@@ -2,6 +2,7 @@
 
 import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
+import { Button } from "./Button";
 
 export function Navbar() {
   const { user, signOut } = useAuth();
@@ -12,48 +13,56 @@ export function Navbar() {
   };
 
   return (
-    <div className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 shadow-lg px-6 py-4 flex justify-between items-center sticky top-0 z-50">
-      {/* Logo */}
-      <Link href="/jobs" className="text-white font-bold text-2xl hover:opacity-90 transition">
-        🤝 ReferFriends
-      </Link>
-
-      {/* Right Side */}
-      <div className="flex items-center gap-6">
-        {user ? (
-          <>
-            {/* User Info */}
-            <div className="flex items-center gap-3">
-              <div className="text-right">
-                <p className="text-white text-sm font-medium">
-                  {user.user_metadata?.username || user.email?.split('@')[0]}
-                </p>
-                <p className="text-blue-100 text-xs">
-                  {user.email}
-                </p>
-              </div>
-              <div className="w-10 h-10 rounded-full bg-white bg-opacity-20 flex items-center justify-center text-white font-bold">
-                {(user.user_metadata?.username || user.email)?.[0]?.toUpperCase() || '👤'}
-              </div>
-            </div>
-
-            {/* Logout Button */}
-            <button
-              onClick={handleLogout}
-              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition transform hover:scale-105"
-            >
-              🚪 Logout
-            </button>
-          </>
-        ) : (
+    <nav className="sticky top-0 z-50 backdrop-blur-xl bg-white/80 border-b-2 border-[#E2E8F0]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex justify-between items-center h-16">
+          {/* Logo */}
           <Link
-            href="/auth/signin"
-            className="bg-white text-blue-600 px-6 py-2 rounded-lg font-semibold hover:bg-blue-50 transition"
+            href="/jobs"
+            className="flex items-center gap-2 text-2xl font-bold text-[#2563EB] hover:opacity-80 transition-opacity"
           >
-            Sign In
+            <span className="text-3xl">🤝</span>
+            <span>ReferFriends</span>
           </Link>
-        )}
+
+          {/* Right Side */}
+          <div className="flex items-center gap-6">
+            {user ? (
+              <>
+                {/* User Info */}
+                <div className="flex items-center gap-3">
+                  <div className="text-right hidden sm:block">
+                    <p className="text-sm font-semibold text-[#0F172A]">
+                      {user.user_metadata?.username || 'User'}
+                    </p>
+                    <p className="text-xs text-[#64748B]">
+                      {user.user_metadata?.company_name || 'Recruit'}
+                    </p>
+                  </div>
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[#2563EB] to-[#4F46E5] flex items-center justify-center text-white font-bold text-sm">
+                    {user.user_metadata?.username?.[0]?.toUpperCase() || user.email?.[0]?.toUpperCase() || '👤'}
+                  </div>
+                </div>
+
+                {/* Logout Button */}
+                <Button
+                  variant="secondary"
+                  size="sm"
+                  onClick={handleLogout}
+                >
+                  🚪 Logout
+                </Button>
+              </>
+            ) : (
+              <Link href="/auth/signin">
+                <Button variant="primary" size="sm">
+                  Sign In
+                </Button>
+              </Link>
+            )}
+          </div>
+        </div>
       </div>
-    </div>
+    </nav>
   );
 }

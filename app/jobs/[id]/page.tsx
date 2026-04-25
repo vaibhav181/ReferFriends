@@ -7,6 +7,9 @@ import { useRouter, useParams } from 'next/navigation';
 import { Job } from '@/lib/types';
 import ReferCandidateModal from '@/components/ReferCandidateModal';
 import ApplicationModal from '@/components/ApplicationModal';
+import { Button } from '@/components/Button';
+import { Card } from '@/components/Card';
+import { Badge } from '@/components/Badge';
 
 export default function JobDetailPage() {
   const router = useRouter();
@@ -58,130 +61,130 @@ export default function JobDetailPage() {
 
   if (authLoading || loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <p className="text-gray-600">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#2563EB] mx-auto mb-4"></div>
+          <p className="text-[#64748B]">Loading job details...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !job) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-        <nav className="bg-white shadow-sm">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              ReferFriends
-            </Link>
-          </div>
-        </nav>
-
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 text-center">
-          <p className="text-red-600 text-lg mb-4">{error || 'Job not found'}</p>
-          <Link href="/jobs" className="text-blue-600 hover:underline">
-            Back to Jobs
+      <div className="min-h-screen bg-[#F8FAFC] flex items-center justify-center">
+        <Card padding="lg" className="text-center max-w-md">
+          <div className="text-5xl mb-4">🔍</div>
+          <p className="text-lg font-semibold text-[#0F172A] mb-4">{error || 'Job not found'}</p>
+          <p className="text-[#64748B] mb-6">The job you're looking for doesn't exist or has been removed.</p>
+          <Link href="/jobs">
+            <Button variant="primary" fullWidth>
+              ← Back to Jobs
+            </Button>
           </Link>
-        </div>
+        </Card>
       </div>
     );
   }
 
   const isOwner = user?.id === job.created_by;
 
+  const jobTypeVariant = {
+    'full-time': 'success' as const,
+    'part-time': 'info' as const,
+    'contract': 'warning' as const,
+    'temporary': 'error' as const,
+  }[job.job_type] || 'default' as const;
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              ReferFriends
-            </Link>
-            <Link href="/jobs" className="text-gray-600 hover:text-blue-600">
-              ← Back to Jobs
-            </Link>
-          </div>
-        </div>
-      </nav>
+    <div className="min-h-screen bg-[#F8FAFC] py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Back Button */}
+        <Link href="/jobs" className="inline-flex items-center gap-2 text-[#2563EB] hover:text-[#4F46E5] transition mb-6 font-semibold">
+          ← Back to Jobs
+        </Link>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="bg-white rounded-lg shadow-lg p-8">
-          <div className="mb-8">
-            <h1 className="text-4xl font-bold text-gray-800 mb-2">
-              {job.title}
-            </h1>
-            <p className="text-xl text-gray-600 mb-4">{job.company_name}</p>
-
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div>
-                <p className="text-sm text-gray-600">Location</p>
-                <p className="text-lg font-semibold text-gray-800">
-                  📍 {job.location}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm text-gray-600">Job Type</p>
-                <p className="text-lg font-semibold text-gray-800">
-                  💼 {job.job_type.charAt(0).toUpperCase() + job.job_type.slice(1)}
-                </p>
-              </div>
-              {job.salary_min && job.salary_max && (
-                <div>
-                  <p className="text-sm text-gray-600">Salary</p>
-                  <p className="text-lg font-semibold text-gray-800">
-                    💰 ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
-                  </p>
-                </div>
-              )}
-              <div>
-                <p className="text-sm text-gray-600">Posted</p>
-                <p className="text-lg font-semibold text-gray-800">
-                  {new Date(job.created_at).toLocaleDateString()}
-                </p>
-              </div>
+        {/* Job Header Card */}
+        <Card padding="lg" className="mb-6">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold text-[#0F172A] mb-2">
+                {job.title}
+              </h1>
+              <p className="text-xl text-[#64748B] mb-4">{job.company_name}</p>
             </div>
+            <Badge variant={jobTypeVariant} size="md">
+              {job.job_type.charAt(0).toUpperCase() + job.job_type.slice(1)}
+            </Badge>
+          </div>
 
-            {isOwner && (
-              <div className="flex gap-2 mb-6">
-                <Link
-                  href={`/jobs/${job.id}/edit`}
-                  className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                >
-                  Edit
-                </Link>
-                <button
-                  onClick={handleDelete}
-                  className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-                >
-                  Delete
-                </button>
+          {/* Job Details Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div>
+              <p className="text-sm font-semibold text-[#64748B] mb-1">📍 Location</p>
+              <p className="text-lg font-bold text-[#0F172A]">{job.location}</p>
+            </div>
+            {job.salary_min && job.salary_max && (
+              <div>
+                <p className="text-sm font-semibold text-[#64748B] mb-1">💰 Salary</p>
+                <p className="text-lg font-bold text-[#0F172A]">
+                  ${job.salary_min.toLocaleString()} - ${job.salary_max.toLocaleString()}
+                </p>
               </div>
             )}
+            <div>
+              <p className="text-sm font-semibold text-[#64748B] mb-1">📅 Posted</p>
+              <p className="text-lg font-bold text-[#0F172A]">
+                {new Date(job.created_at).toLocaleDateString()}
+              </p>
+            </div>
+          </div>
 
-            {!isOwner && (
-              <div className="flex gap-3 mb-6">
-                <button
-                  onClick={() => setIsApplicationModalOpen(true)}
-                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg transition"
-                >
+          {/* Action Buttons */}
+          {isOwner && (
+            <div className="flex gap-3 flex-wrap">
+              <Link href={`/jobs/${job.id}/edit`} className="flex-1 min-w-[160px]">
+                <Button variant="secondary" fullWidth>
+                  ✏️ Edit Job
+                </Button>
+              </Link>
+              <button onClick={handleDelete} className="flex-1 min-w-[160px]">
+                <Button variant="danger" fullWidth>
+                  🗑️ Delete Job
+                </Button>
+              </button>
+            </div>
+          )}
+
+          {!isOwner && (
+            <div className="flex gap-3 flex-wrap">
+              <button
+                onClick={() => setIsApplicationModalOpen(true)}
+                className="flex-1 min-w-[160px]"
+              >
+                <Button variant="primary" fullWidth>
                   💼 Apply Now
-                </button>
-                <button
-                  onClick={() => setIsReferModalOpen(true)}
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-lg transition"
-                >
+                </Button>
+              </button>
+              <button
+                onClick={() => setIsReferModalOpen(true)}
+                className="flex-1 min-w-[160px]"
+              >
+                <Button variant="success" fullWidth>
                   👥 Refer Someone
-                </button>
-              </div>
-            )}
-          </div>
-
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-4">Job Description</h2>
-            <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap leading-relaxed">
-              {job.description}
+                </Button>
+              </button>
             </div>
+          )}
+        </Card>
+
+        {/* Job Description Card */}
+        <Card padding="lg">
+          <h2 className="text-2xl font-bold text-[#0F172A] mb-6">📋 Job Description</h2>
+          <div className="text-[#0F172A] whitespace-pre-wrap leading-relaxed text-base">
+            {job.description}
           </div>
-        </div>
+        </Card>
       </div>
 
       {/* Refer Modal */}

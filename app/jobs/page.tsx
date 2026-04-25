@@ -5,6 +5,9 @@ import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Job } from '@/lib/types';
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
+import { JobCard } from '@/components/JobCard';
 
 export default function JobsPage() {
   const router = useRouter();
@@ -53,8 +56,16 @@ export default function JobsPage() {
 
   if (authLoading || (user && loading)) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-        <p className="text-gray-600">Loading...</p>
+      <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC]">
+        <div className="text-center">
+          <div className="inline-block p-3 bg-[#2563EB] rounded-full mb-4 animate-pulse">
+            <svg className="w-8 h-8 text-white animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
+            </svg>
+          </div>
+          <p className="text-[#64748B] font-medium">Loading jobs...</p>
+        </div>
       </div>
     );
   }
@@ -64,109 +75,78 @@ export default function JobsPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
-      {/* Navigation */}
-      <nav className="bg-white shadow-sm sticky top-0 z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+    <div className="min-h-screen bg-[#F8FAFC]">
+      {/* Header Section */}
+      <div className="bg-white border-b-2 border-[#E2E8F0]">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="flex justify-between items-center">
-            <Link href="/" className="text-2xl font-bold text-blue-600">
-              ReferFriends
-            </Link>
-            <div className="space-x-4">
-              <span className="text-sm text-gray-600">
-                Signed in as {user.email}
-              </span>
-              <Link
-                href="/jobs/create"
-                className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 inline-block"
-              >
-                Post a Job
-              </Link>
+            <div>
+              <h1 className="text-3xl font-bold text-[#0F172A] mb-1">
+                Browse Open Positions
+              </h1>
+              <p className="text-[#64748B]">
+                {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} available
+              </p>
             </div>
+            <Link href="/jobs/create">
+              <Button variant="primary" size="lg">
+                ➕ Post a Job
+              </Button>
+            </Link>
           </div>
         </div>
-      </nav>
+      </div>
 
+      {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Search and Filter */}
+        {/* Search and Filters */}
         <div className="mb-8 space-y-4">
-          <div>
-            <input
-              type="text"
-              placeholder="Search jobs, companies, or locations..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
+          <Input
+            placeholder="Search jobs, companies, or locations..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon="🔍"
+          />
 
           <div className="flex gap-4 flex-wrap">
             <select
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              className="px-4 py-2.5 rounded-xl border-2 border-[#E2E8F0] bg-white text-[#0F172A] font-medium
+                focus:outline-none focus:ring-2 focus:ring-[#2563EB] focus:border-[#2563EB]
+                transition-all duration-200"
             >
-              <option value="all">All Job Types</option>
-              <option value="full-time">Full-time</option>
-              <option value="part-time">Part-time</option>
-              <option value="contract">Contract</option>
-              <option value="temporary">Temporary</option>
+              <option value="all">📌 All Job Types</option>
+              <option value="full-time">💼 Full-time</option>
+              <option value="part-time">🕐 Part-time</option>
+              <option value="contract">📋 Contract</option>
+              <option value="temporary">⏰ Temporary</option>
             </select>
           </div>
         </div>
 
         {/* Jobs Grid */}
         {filteredJobs.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-600 text-lg mb-4">
-              {jobs.length === 0 ? 'No jobs posted yet.' : 'No jobs match your search.'}
+          <div className="text-center py-16">
+            <div className="text-6xl mb-4">🔍</div>
+            <p className="text-xl font-semibold text-[#0F172A] mb-2">
+              {jobs.length === 0 ? 'No jobs posted yet' : 'No jobs match your search'}
             </p>
-            <Link
-              href="/jobs/create"
-              className="inline-block bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700"
-            >
-              Post the First Job
+            <p className="text-[#64748B] mb-6">
+              {jobs.length === 0 
+                ? 'Be the first to post an opportunity!' 
+                : 'Try adjusting your filters or search terms'}
+            </p>
+            <Link href="/jobs/create">
+              <Button variant="primary" size="lg">
+                ➕ Post a Job
+              </Button>
             </Link>
           </div>
         ) : (
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredJobs.map((job) => (
-              <Link
-                key={job.id}
-                href={`/jobs/${job.id}`}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition-shadow p-6"
-              >
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-800 mb-1">
-                    {job.title}
-                  </h3>
-                  <p className="text-sm text-gray-600 mb-3">{job.company_name}</p>
-
-                  <div className="space-y-2 text-sm text-gray-600 mb-4">
-                    <p>📍 {job.location}</p>
-                    <p>
-                      💼{' '}
-                      {job.job_type.charAt(0).toUpperCase() +
-                        job.job_type.slice(1)}
-                    </p>
-                    {job.salary_min && job.salary_max && (
-                      <p>
-                        💰 ${job.salary_min.toLocaleString()} -{' '}
-                        ${job.salary_max.toLocaleString()}
-                      </p>
-                    )}
-                  </div>
-
-                  <p className="text-sm text-gray-700 line-clamp-3">
-                    {job.description}
-                  </p>
-                </div>
-
-                <div className="mt-4 text-xs text-gray-500">
-                  Posted{' '}
-                  {new Date(job.created_at).toLocaleDateString()}
-                </div>
-              </Link>
+              <JobCard key={job.id} job={job} />
             ))}
           </div>
         )}

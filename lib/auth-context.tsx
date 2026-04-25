@@ -7,7 +7,7 @@ import { supabase } from '@/lib/supabase';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signUp: (email: string, password: string, company: string) => Promise<void>;
+  signUp: (email: string, password: string, company: string, fullName: string) => Promise<void>;
   signIn: (email: string, password: string) => Promise<void>;
   signOut: () => Promise<void>;
 }
@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => subscription?.unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, company: string) => {
+  const signUp = async (email: string, password: string, company: string, fullName: string) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.auth.signUp({
@@ -44,10 +44,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (error) throw error;
 
-      // Store company name in user metadata
+      // Store company name and username in user metadata
       if (data.user) {
         await supabase.auth.updateUser({
-          data: { company_name: company },
+          data: { company_name: company, username: fullName },
         });
       }
     } finally {

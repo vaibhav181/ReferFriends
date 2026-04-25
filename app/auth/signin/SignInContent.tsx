@@ -4,6 +4,9 @@ import { useState, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/auth-context';
+import { Button } from '@/components/Button';
+import { Input } from '@/components/Input';
+import { Card } from '@/components/Card';
 
 export default function SignInContent() {
   const router = useRouter();
@@ -47,68 +50,86 @@ export default function SignInContent() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 px-4">
-      <div className="w-full max-w-md bg-white rounded-lg shadow-lg p-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">ReferFriends</h1>
-        <p className="text-gray-600 mb-6">Sign in to post jobs</p>
-
-        {message && (
-          <div className="mb-4 p-4 bg-blue-50 border border-blue-200 text-blue-700 rounded">
-            {message}
+    <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 py-12">
+      <div className="w-full max-w-md">
+        {/* Logo Section */}
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <span className="text-5xl">🤝</span>
           </div>
-        )}
+          <h1 className="text-3xl font-bold text-[#0F172A] mb-2">ReferFriends</h1>
+          <p className="text-[#64748B]">Post jobs and refer great candidates</p>
+        </div>
 
-        {error && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 text-red-700 rounded">
-            {error}
-          </div>
-        )}
+        {/* Card */}
+        <Card padding="lg">
+          {/* Message Alert */}
+          {message && (
+            <div className="mb-6 p-4 bg-[#DBEAFE] border-2 border-[#93C5FD] text-[#0C4A6E] rounded-xl text-sm font-medium">
+              ✓ {message}
+            </div>
+          )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Email
-            </label>
-            <input
+          {/* Error Alert */}
+          {error && (
+            <div className="mb-6 p-4 bg-[#FEE2E2] border-2 border-[#FECACA] text-[#991B1B] rounded-xl text-sm font-medium">
+              ✕ {error}
+            </div>
+          )}
+
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <Input
+              label="Email"
               type="email"
               name="email"
               value={formData.email}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="your@email.com"
+              icon="📧"
               required
             />
-          </div>
 
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">
-              Password
-            </label>
-            <input
+            <Input
+              label="Password"
               type="password"
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
               placeholder="••••••••"
+              icon="🔒"
               required
             />
-          </div>
 
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 text-white font-semibold py-2 rounded-lg"
-          >
-            {loading ? 'Signing in...' : 'Sign In'}
-          </button>
-        </form>
+            <Button
+              type="submit"
+              variant="primary"
+              size="lg"
+              fullWidth
+              isLoading={loading}
+            >
+              Sign In
+            </Button>
+          </form>
 
-        <p className="mt-4 text-center text-gray-600">
-          Don't have an account?{' '}
-          <Link href="/auth/signup" className="text-blue-600 hover:underline">
-            Sign up
-          </Link>
+          {/* Divider */}
+          <div className="my-6 border-t-2 border-[#E2E8F0]" />
+
+          {/* Sign Up Link */}
+          <p className="text-center text-[#64748B]">
+            Don't have an account?{' '}
+            <Link
+              href="/auth/signup"
+              className="text-[#2563EB] font-semibold hover:underline transition"
+            >
+              Sign up here
+            </Link>
+          </p>
+        </Card>
+
+        {/* Footer */}
+        <p className="text-center text-xs text-[#94A3B8] mt-6">
+          By signing in, you agree to our Terms of Service
         </p>
       </div>
     </div>
