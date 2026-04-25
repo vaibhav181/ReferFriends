@@ -19,3 +19,18 @@ export type User = {
   company_name: string;
   created_at: string;
 };
+
+export type Referral = {
+  id: string;
+  job_id: string;
+  referrer_id: string;
+  candidate_email: string;
+  candidate_name: string;
+  candidate_linkedin?: string;
+  referrer_message?: string;
+  status: 'applied' | 'screening' | 'interviewing' | 'offered' | 'hired' | 'rejected';
+  points_earned: number;
+  bonus_points: number;
+  created_at: string;
+  updated_at: string;
+};

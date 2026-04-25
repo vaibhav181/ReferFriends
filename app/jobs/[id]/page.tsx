@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context';
 import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { Job } from '@/lib/types';
+import ReferCandidateModal from '@/components/ReferCandidateModal';
 
 export default function JobDetailPage() {
   const router = useRouter();
@@ -13,6 +14,7 @@ export default function JobDetailPage() {
   const [job, setJob] = useState<Job | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [isReferModalOpen, setIsReferModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -152,6 +154,17 @@ export default function JobDetailPage() {
                 </button>
               </div>
             )}
+
+            {!isOwner && (
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setIsReferModalOpen(true)}
+                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-lg"
+                >
+                  👥 Refer a Candidate
+                </button>
+              </div>
+            )}
           </div>
 
           <div>
@@ -162,6 +175,18 @@ export default function JobDetailPage() {
           </div>
         </div>
       </div>
+
+      {/* Refer Modal */}
+      <ReferCandidateModal
+        jobId={job.id}
+        jobTitle={job.title}
+        isOpen={isReferModalOpen}
+        onClose={() => setIsReferModalOpen(false)}
+        onSuccess={() => {
+          // Optionally refresh job data or show notification
+          console.log('Referral sent successfully!');
+        }}
+      />
     </div>
   );
 }
