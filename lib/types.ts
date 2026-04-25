@@ -34,3 +34,14 @@ export type Referral = {
   created_at: string;
   updated_at: string;
 };
+
+export type Application = {
+  id: string;
+  job_id: string;
+  user_id: string;
+  resume_url?: string;
+  cover_letter?: string;
+  status: 'applied' | 'reviewing' | 'interview' | 'offer' | 'rejected' | 'accepted';
+  created_at: string;
+  updated_at: string;
+};

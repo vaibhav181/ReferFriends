@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter, useParams } from 'next/navigation';
 import { Job } from '@/lib/types';
 import ReferCandidateModal from '@/components/ReferCandidateModal';
+import ApplicationModal from '@/components/ApplicationModal';
 
 export default function JobDetailPage() {
   const router = useRouter();
@@ -15,6 +16,7 @@ export default function JobDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isReferModalOpen, setIsReferModalOpen] = useState(false);
+  const [isApplicationModalOpen, setIsApplicationModalOpen] = useState(false);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -156,12 +158,18 @@ export default function JobDetailPage() {
             )}
 
             {!isOwner && (
-              <div className="flex gap-2 mb-6">
+              <div className="flex gap-3 mb-6">
+                <button
+                  onClick={() => setIsApplicationModalOpen(true)}
+                  className="flex-1 px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-lg transition"
+                >
+                  💼 Apply Now
+                </button>
                 <button
                   onClick={() => setIsReferModalOpen(true)}
-                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-lg"
+                  className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-lg transition"
                 >
-                  👥 Refer a Candidate
+                  👥 Refer Someone
                 </button>
               </div>
             )}
@@ -183,8 +191,18 @@ export default function JobDetailPage() {
         isOpen={isReferModalOpen}
         onClose={() => setIsReferModalOpen(false)}
         onSuccess={() => {
-          // Optionally refresh job data or show notification
           console.log('Referral sent successfully!');
+        }}
+      />
+
+      {/* Application Modal */}
+      <ApplicationModal
+        jobId={job.id}
+        jobTitle={job.title}
+        isOpen={isApplicationModalOpen}
+        onClose={() => setIsApplicationModalOpen(false)}
+        onSuccess={() => {
+          console.log('Application submitted successfully!');
         }}
       />
     </div>
