@@ -79,7 +79,7 @@ export async function POST(request: NextRequest) {
     // Check if job exists
     const { data: jobExists, error: jobError } = await supabaseAdmin
       .from('jobs')
-      .select('id, title, company_name')
+      .select('id, title, company_name, reward_amount_inr')
       .eq('id', job_id)
       .eq('status', 'active')
       .single();
@@ -104,6 +104,8 @@ export async function POST(request: NextRequest) {
           referrer_message: referrer_message || null,
           status: 'applied',
           points_earned: 50,
+          reward_amount_inr: jobExists.reward_amount_inr || 0,
+          payout_status: 'pending',
         },
       ])
       .select()

@@ -50,6 +50,20 @@ export function Navbar() {
                 >
                   My Referrals
                 </Link>
+                <Link
+                  href="/earnings"
+                  className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+                >
+                  My Earnings
+                </Link>
+                {user.user_metadata?.role === 'admin' ? (
+                  <Link
+                    href="/admin/payouts"
+                    className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+                  >
+                    Admin Payouts
+                  </Link>
+                ) : null}
 
                 {/* User Info */}
                 <div className="flex items-center gap-3">

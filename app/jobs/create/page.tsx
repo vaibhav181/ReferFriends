@@ -21,6 +21,7 @@ export default function CreateJobPage() {
     job_type: "full-time",
     salary_min: "",
     salary_max: "",
+    reward_amount_inr: "",
   })
 
   const [loading, setLoading] = useState(false)
@@ -74,6 +75,7 @@ export default function CreateJobPage() {
           job_type: formData.job_type,
           salary_min: formData.salary_min ? Number(formData.salary_min) : null,
           salary_max: formData.salary_max ? Number(formData.salary_max) : null,
+          reward_amount_inr: formData.reward_amount_inr ? Number(formData.reward_amount_inr) : 0,
         }),
       })
 
@@ -178,6 +180,16 @@ export default function CreateJobPage() {
               <option value="part-time">Part-time</option>
               <option value="contract">Contract</option>
             </select>
+
+            <Input
+              label="Referral Reward (INR)"
+              name="reward_amount_inr"
+              type="number"
+              min="0"
+              value={formData.reward_amount_inr}
+              onChange={handleChange}
+              helperText="Amount paid to the referrer when this candidate is marked hired."
+            />
 
             <textarea
               name="description"

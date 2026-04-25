@@ -6,6 +6,18 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY!
 );
 
+const allowedStatuses = ['applied', 'screening', 'interviewing', 'offered', 'hired', 'rejected'] as const;
+type ReferralStatus = (typeof allowedStatuses)[number];
+
+const allowedTransitions: Record<ReferralStatus, ReferralStatus[]> = {
+  applied: ['screening', 'interviewing', 'offered', 'hired', 'rejected'],
+  screening: ['interviewing', 'offered', 'hired', 'rejected'],
+  interviewing: ['offered', 'hired', 'rejected'],
+  offered: ['hired', 'rejected'],
+  hired: [],
+  rejected: [],
+};
+
 // 📝 UPDATE REFERRAL STATUS (recruiters only)
 export async function PUT(
   request: NextRequest,
@@ -51,11 +63,18 @@ export async function PUT(
     }
 
     const body = await request.json();
-    const { status } = body;
+    const { status } = body as { status?: ReferralStatus };
 
     if (!status) {
       return NextResponse.json(
         { error: 'Missing status field' },
+        { status: 400 }
+      );
+    }
+
+    if (!allowedStatuses.includes(status)) {
+      return NextResponse.json(
+        { error: 'Invalid status value' },
         { status: 400 }
       );
     }
@@ -65,7 +84,7 @@ export async function PUT(
       .from('referrals')
       .select(`
         *,
-        job:job_id (created_by)
+        job:job_id (created_by, reward_amount_inr)
       `)
       .eq('id', id)
       .single();
@@ -77,11 +96,22 @@ export async function PUT(
       );
     }
 
-    // Verify recruiter is the job creator
-    if (referral.job.created_by !== user.id) {
+    const isAdmin = user.user_metadata?.role === 'admin';
+    const isOwner = referral.job.created_by === user.id;
+
+    // Verify recruiter is the job creator or admin
+    if (!isAdmin && !isOwner) {
       return NextResponse.json(
-        { error: 'Unauthorized: You can only update referrals for your jobs' },
+        { error: 'Unauthorized: Only owner recruiter or admin can update referral status' },
         { status: 403 }
+      );
+    }
+
+    const currentStatus = referral.status as ReferralStatus;
+    if (currentStatus !== status && !allowedTransitions[currentStatus]?.includes(status)) {
+      return NextResponse.json(
+        { error: `Invalid status transition from ${currentStatus} to ${status}` },
+        { status: 400 }
       );
     }
 
@@ -95,19 +125,51 @@ export async function PUT(
       bonusPoints = 200;
     }
 
+    const nextBonusPoints = (referral.bonus_points || 0) + bonusPoints;
+
+    const updatePayload: Record<string, unknown> = {
+      status,
+      bonus_points: nextBonusPoints,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (status === 'hired') {
+      updatePayload.payout_status = referral.payout_status === 'paid' ? 'paid' : 'pending';
+    }
+
     // Update referral
     const { data: updated, error } = await supabaseAdmin
       .from('referrals')
-      .update({
-        status,
-        bonus_points: (referral.bonus_points || 0) + bonusPoints,
-        updated_at: new Date().toISOString(),
-      })
+      .update(updatePayload)
       .eq('id', id)
       .select()
       .single();
 
     if (error) throw error;
+
+    if (status === 'hired' && currentStatus !== 'hired') {
+      const rewardAmountInr =
+        Number(referral.reward_amount_inr || 0) || Number(referral.job?.reward_amount_inr || 0) || 0;
+
+      if (rewardAmountInr > 0) {
+        const { error: earningsError } = await supabaseAdmin
+          .from('earnings_ledger')
+          .insert([
+            {
+              referral_id: referral.id,
+              user_id: referral.referrer_id,
+              job_id: referral.job_id,
+              event_type: 'hired_reward',
+              amount_inr: rewardAmountInr,
+              note: 'Reward unlocked after referral marked hired',
+            },
+          ]);
+
+        if (earningsError && earningsError.code !== '23505') {
+          throw earningsError;
+        }
+      }
+    }
 
     return NextResponse.json({
       referral: updated,

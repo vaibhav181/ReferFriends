@@ -80,12 +80,20 @@ export async function POST(request: NextRequest) {
       salary_min,
       salary_max,
       company_name,
+      reward_amount_inr,
     } = body;
 
     // ✅ Validation
     if (!title || !description || !location || !job_type || !company_name) {
       return NextResponse.json(
         { error: 'Missing required fields' },
+        { status: 400 }
+      );
+    }
+
+    if (reward_amount_inr != null && (!Number.isFinite(reward_amount_inr) || reward_amount_inr < 0)) {
+      return NextResponse.json(
+        { error: 'reward_amount_inr must be a non-negative number' },
         { status: 400 }
       );
     }
@@ -102,6 +110,7 @@ export async function POST(request: NextRequest) {
           job_type: job_type.toLowerCase(),
           salary_min: salary_min || null,
           salary_max: salary_max || null,
+          reward_amount_inr: reward_amount_inr || 0,
           company_name,
           status: 'active',
         },
