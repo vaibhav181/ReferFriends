@@ -18,13 +18,13 @@ function parseCliArgs() {
   };
 }
 
-// ✅ Proper type for DB row
 type ExistingJob = {
   id: string;
 };
 
+// ✅ loosened type to avoid Supabase generic conflicts
 async function fallbackUpsertByExternalId(
-  supabaseAdmin: ReturnType<typeof createClient>,
+  supabaseAdmin: any,
   jobs: MappedWorkdayJob[]
 ) {
   let inserted = 0;
@@ -36,7 +36,7 @@ async function fallbackUpsertByExternalId(
       .select('id')
       .eq('source', job.source)
       .eq('external_id', job.external_id)
-      .maybeSingle<ExistingJob>(); // ✅ FIXED typing here
+      .maybeSingle();
 
     if (selectError) {
       throw new Error(
@@ -44,9 +44,11 @@ async function fallbackUpsertByExternalId(
       );
     }
 
+    // ✅ cast table once
+    const jobsTable = supabaseAdmin.from('jobs') as any;
+
     if (existing?.id) {
-      const { error: updateError } = await supabaseAdmin
-        .from('jobs')
+      const { error: updateError } = await jobsTable
         .update(job)
         .eq('id', existing.id);
 
@@ -58,9 +60,7 @@ async function fallbackUpsertByExternalId(
 
       updated += 1;
     } else {
-      const { error: insertError } = await supabaseAdmin
-        .from('jobs')
-        .insert([job]);
+      const { error: insertError } = await jobsTable.insert([job]);
 
       if (insertError) {
         throw new Error(
@@ -117,7 +117,10 @@ async function main() {
   for (let i = 0; i < mappedJobs.length; i += chunkSize) {
     const chunk = mappedJobs.slice(i, i + chunkSize);
 
-    const { error } = await supabaseAdmin.from('jobs').upsert(chunk, {
+    // ✅ cast here too
+    const jobsTable = supabaseAdmin.from('jobs') as any;
+
+    const { error } = await jobsTable.upsert(chunk, {
       onConflict: 'source,external_id',
       ignoreDuplicates: false,
     });
