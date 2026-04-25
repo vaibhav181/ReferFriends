@@ -158,22 +158,23 @@ export default function JobDetailPage() {
 
           {!isOwner && (
             <div className="flex gap-3 flex-wrap">
-              <button
-                onClick={() => setIsApplicationModalOpen(true)}
-                className="flex-1 min-w-[160px]"
-              >
-                <Button variant="primary" fullWidth>
-                  💼 Apply Now
-                </Button>
-              </button>
-              <button
-                onClick={() => setIsReferModalOpen(true)}
-                className="flex-1 min-w-[160px]"
-              >
-                <Button variant="success" fullWidth>
-                  👥 Refer Someone
-                </Button>
-              </button>
+<Button
+  variant="primary"
+  fullWidth
+  onClick={() => setIsApplicationModalOpen(true)}
+  className="flex-1 min-w-[160px]"
+>
+  💼 Apply Now
+</Button>
+
+<Button
+  variant="success"
+  fullWidth
+  onClick={() => setIsReferModalOpen(true)}
+  className="flex-1 min-w-[160px]"
+>
+  👥 Refer Someone
+</Button>
             </div>
           )}
         </Card>

@@ -1,8 +1,23 @@
 'use client';
 
 import { useState } from 'react';
+import { supabase } from '@/lib/supabase';
 
-export default function ReferCandidateModal({ job, onClose }: any) {
+interface ReferCandidateModalProps {
+  jobId?: string;
+  jobTitle?: string;
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
+
+export default function ReferCandidateModal({ 
+  jobId, 
+  jobTitle, 
+  isOpen, 
+  onClose, 
+  onSuccess 
+}: ReferCandidateModalProps) {
   const [loading, setLoading] = useState(false);
 
   const [formData, setFormData] = useState({
@@ -17,9 +32,13 @@ export default function ReferCandidateModal({ job, onClose }: any) {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // ✅ STEP 1: CONNECT FRONTEND → API
+  // ✅ FIXED: Full working referral handler
   const handleSendReferral = async () => {
-    console.log("Sending referral...");
+    // Validate required fields
+    if (!jobId) {
+      alert("Error: Job ID is missing. Please refresh and try again.");
+      return;
+    }
 
     if (!formData.candidateEmail || !formData.candidateName) {
       alert("Please fill required fields");
@@ -29,118 +48,141 @@ export default function ReferCandidateModal({ job, onClose }: any) {
     try {
       setLoading(true);
 
-      const res = await fetch("/api/refer", {
+      // ✅ Get logged-in session
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        alert("You must be logged in");
+        return;
+      }
+
+      const res = await fetch("/api/referrals", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${session.access_token}`, // ✅ REQUIRED
         },
         body: JSON.stringify({
-          email: formData.candidateEmail,
-          name: formData.candidateName,
+          job_id: jobId, // ✅ IMPORTANT
+          candidate_name: formData.candidateName,
+          candidate_email: formData.candidateEmail,
+          candidate_linkedin: formData.linkedin,
+          referrer_message: formData.message,
         }),
       });
 
       const data = await res.json();
 
-      console.log("Response:", data);
+      if (!res.ok) {
+        const errorMessage = typeof data === 'object' && data?.error 
+          ? data.error 
+          : "Something went wrong";
+        throw new Error(errorMessage);
+      }
 
-      alert("Step 1 working ✅");
+      console.log("Success:", data);
 
-      onClose(); // close modal
-    } catch (err) {
+      alert("🎉 Referral sent successfully!");
+
+      onClose();
+      if (onSuccess) onSuccess();
+    } catch (err: any) {
       console.error(err);
-      alert("Error ❌");
+      alert(err.message || "Error sending referral ❌");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl w-full max-w-md overflow-hidden shadow-lg">
+    <>
+      {isOpen && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl w-full max-w-md overflow-hidden shadow-lg">
+            {/* Header */}
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex justify-between items-center">
+              <h2 className="text-lg font-semibold">Refer a Candidate</h2>
+              <button onClick={onClose}>✕</button>
+            </div>
 
-        {/* Header */}
-        <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 flex justify-between items-center">
-          <h2 className="text-lg font-semibold">Refer a Candidate</h2>
-          <button onClick={onClose}>✕</button>
+            {/* Body */}
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-sm">Job Position</label>
+                <input
+                  value={jobTitle || ''}
+                  disabled
+                  className="w-full border px-3 py-2 rounded bg-gray-100"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm">Candidate Name *</label>
+                <input
+                  name="candidateName"
+                  value={formData.candidateName}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm">Candidate Email *</label>
+                <input
+                  name="candidateEmail"
+                  value={formData.candidateEmail}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                  placeholder="john@example.com"
+                />
+              </div>
+
+              <div>
+                <label className="text-sm">LinkedIn</label>
+                <input
+                  name="linkedin"
+                  value={formData.linkedin}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                  placeholder="linkedin.com/in/..."
+                />
+              </div>
+
+              <div>
+                <label className="text-sm">Message</label>
+                <textarea
+                  name="message"
+                  value={formData.message}
+                  onChange={handleChange}
+                  className="w-full border px-3 py-2 rounded"
+                  placeholder="Optional message"
+                />
+              </div>
+
+              {/* Buttons */}
+              <div className="flex justify-between gap-4 pt-4">
+                <button
+                  onClick={onClose}
+                  className="w-full border py-2 rounded"
+                >
+                  Cancel
+                </button>
+
+                <button
+                  onClick={handleSendReferral}
+                  disabled={loading}
+                  className="w-full bg-blue-600 text-white py-2 rounded disabled:bg-gray-400"
+                >
+                  {loading ? "Sending..." : "Send Referral"}
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
-
-        {/* Body */}
-        <div className="p-6 space-y-4">
-
-          <div>
-            <label className="text-sm">Job Position</label>
-            <input
-              value={job?.title || ''}
-              disabled
-              className="w-full border px-3 py-2 rounded bg-gray-100"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm">Candidate Name *</label>
-            <input
-              name="candidateName"
-              value={formData.candidateName}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="John Doe"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm">Candidate Email *</label>
-            <input
-              name="candidateEmail"
-              value={formData.candidateEmail}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="john@example.com"
-            />
-          </div>
-
-          <div>
-            <label className="text-sm">LinkedIn</label>
-            <input
-              name="linkedin"
-              value={formData.linkedin}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="linkedin.com/in/..."
-            />
-          </div>
-
-          <div>
-            <label className="text-sm">Message</label>
-            <textarea
-              name="message"
-              value={formData.message}
-              onChange={handleChange}
-              className="w-full border px-3 py-2 rounded"
-              placeholder="Optional message"
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="flex justify-between gap-4 pt-4">
-            <button
-              onClick={onClose}
-              className="w-full border py-2 rounded"
-            >
-              Cancel
-            </button>
-
-            <button
-              onClick={handleSendReferral}
-              disabled={loading}
-              className="w-full bg-blue-600 text-white py-2 rounded disabled:bg-gray-400"
-            >
-              {loading ? "Sending..." : "Send Referral"}
-            </button>
-          </div>
-
-        </div>
-      </div>
-    </div>
+      )}
+    </>
   );
 }
