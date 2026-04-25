@@ -64,6 +64,47 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000) in your browser.
 
+## Workday One-Time Importer
+
+Run a single Workday backfill using POST pagination and dedupe by `source + external_id`.
+
+1. Apply SQL migration: `SQL_SETUP_WORKDAY_IMPORT.sql`
+2. Set env vars (example):
+
+```env
+WORKDAY_COMPANY_NAME=Acme
+WORKDAY_ENDPOINT_URL=https://example.workday.com/wday/cxs/acme/jobs
+WORKDAY_HEADERS_JSON={"Content-Type":"application/json"}
+WORKDAY_BASE_BODY_JSON={}
+WORKDAY_PAGINATION_MODE=offset-limit
+WORKDAY_PAGE_SIZE=20
+WORKDAY_START_OFFSET=0
+WORKDAY_RESPONSE_ITEMS_PATH=jobPostings
+WORKDAY_RESPONSE_TOTAL_PATH=total
+WORKDAY_OWNER_USER_ID=uuid-of-owner-user
+WORKDAY_APPLY_BASE_URL=https://example.workday.com
+WORKDAY_FIELD_ID=id
+WORKDAY_FIELD_TITLE=title
+WORKDAY_FIELD_LOCATION=locations.0
+WORKDAY_FIELD_EXTERNAL_PATH=externalPath
+WORKDAY_FIELD_POSTING_START_DATE=postedOn
+WORKDAY_FIELD_POSTING_END_DATE=endDate
+WORKDAY_FIELD_DESCRIPTION=description
+WORKDAY_FIELD_JOB_TYPE=timeType
+```
+
+3. Dry run:
+
+```bash
+npm run import:workday:dry-run
+```
+
+4. Execute import:
+
+```bash
+npm run import:workday:once
+```
+
 ## 📁 Project Structure
 
 ```
