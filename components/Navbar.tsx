@@ -44,6 +44,13 @@ export function Navbar() {
           <div className="flex items-center gap-6">
             {user ? (
               <>
+                <Link
+                  href="/referrals"
+                  className="text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8] transition-colors"
+                >
+                  My Referrals
+                </Link>
+
                 {/* User Info */}
                 <div className="flex items-center gap-3">
                   <div className="text-right hidden sm:block">

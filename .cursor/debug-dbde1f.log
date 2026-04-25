@@ -1,0 +1,6 @@
+{"sessionId":"dbde1f","runId":"initial","hypothesisId":"H1","location":"lib/auth-context.tsx:getSession:start","message":"Starting getSession on mount","data":{},"timestamp":1777146819459}
+{"sessionId":"dbde1f","runId":"initial","hypothesisId":"H1","location":"lib/auth-context.tsx:getSession:result","message":"getSession resolved","data":{"hasSession":false,"hasUser":false,"errorMessage":null,"errorName":null},"timestamp":1777146819471}
+{"sessionId":"dbde1f","runId":"initial","hypothesisId":"H2","location":"lib/auth-context.tsx:onAuthStateChange","message":"Auth state changed","data":{"event":"INITIAL_SESSION","hasSession":false,"hasUser":false},"timestamp":1777146819478}
+{"sessionId":"dbde1f","runId":"initial","hypothesisId":"H3","location":"lib/auth-context.tsx:signIn:start","message":"signInWithPassword started","data":{"emailDomain":"gmail.com"},"timestamp":1777146830842}
+{"sessionId":"dbde1f","runId":"initial","hypothesisId":"H2","location":"lib/auth-context.tsx:onAuthStateChange","message":"Auth state changed","data":{"event":"SIGNED_IN","hasSession":true,"hasUser":true},"timestamp":1777146831806}
+{"sessionId":"dbde1f","runId":"initial","hypothesisId":"H3","location":"lib/auth-context.tsx:signIn:result","message":"signInWithPassword resolved","data":{"hasSession":true,"hasUser":true,"errorMessage":null},"timestamp":1777146831806}

@@ -88,11 +88,18 @@ export default function JobsPage() {
                 {filteredJobs.length} {filteredJobs.length === 1 ? 'job' : 'jobs'} available
               </p>
             </div>
-            <Link href="/jobs/create">
-              <Button variant="primary" size="lg">
-                ➕ Post a Job
-              </Button>
-            </Link>
+            <div className="flex items-center gap-3">
+              <Link href="/referrals">
+                <Button variant="secondary" size="lg">
+                  📋 My Referrals
+                </Button>
+              </Link>
+              <Link href="/jobs/create">
+                <Button variant="primary" size="lg">
+                  ➕ Post a Job
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </div>
