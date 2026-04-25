@@ -18,6 +18,11 @@ function parseCliArgs() {
   };
 }
 
+// ✅ Proper type for DB row
+type ExistingJob = {
+  id: string;
+};
+
 async function fallbackUpsertByExternalId(
   supabaseAdmin: ReturnType<typeof createClient>,
   jobs: MappedWorkdayJob[]
@@ -31,7 +36,7 @@ async function fallbackUpsertByExternalId(
       .select('id')
       .eq('source', job.source)
       .eq('external_id', job.external_id)
-      .maybeSingle();
+      .maybeSingle<ExistingJob>(); // ✅ FIXED typing here
 
     if (selectError) {
       throw new Error(
@@ -44,19 +49,25 @@ async function fallbackUpsertByExternalId(
         .from('jobs')
         .update(job)
         .eq('id', existing.id);
+
       if (updateError) {
         throw new Error(
           `[workday-import] Fallback update failed for external_id=${job.external_id}: ${updateError.message}`
         );
       }
+
       updated += 1;
     } else {
-      const { error: insertError } = await supabaseAdmin.from('jobs').insert([job]);
+      const { error: insertError } = await supabaseAdmin
+        .from('jobs')
+        .insert([job]);
+
       if (insertError) {
         throw new Error(
           `[workday-import] Fallback insert failed for external_id=${job.external_id}: ${insertError.message}`
         );
       }
+
       inserted += 1;
     }
   }
@@ -102,8 +113,10 @@ async function main() {
   let processed = 0;
   let inserted = 0;
   let updated = 0;
+
   for (let i = 0; i < mappedJobs.length; i += chunkSize) {
     const chunk = mappedJobs.slice(i, i + chunkSize);
+
     const { error } = await supabaseAdmin.from('jobs').upsert(chunk, {
       onConflict: 'source,external_id',
       ignoreDuplicates: false,
@@ -114,6 +127,7 @@ async function main() {
         console.warn(
           '[workday-import] Upsert conflict target unavailable; using fallback dedupe mode.'
         );
+
         const result = await fallbackUpsertByExternalId(supabaseAdmin, chunk);
         inserted += result.inserted;
         updated += result.updated;
