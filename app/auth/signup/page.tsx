@@ -11,6 +11,7 @@ import { Card } from '@/components/Card';
 export default function SignUpPage() {
   const router = useRouter();
   const { signUp, loading } = useAuth();
+
   const [formData, setFormData] = useState({
     fullName: '',
     email: '',
@@ -18,11 +19,16 @@ export default function SignUpPage() {
     confirmPassword: '',
     company: '',
   });
+
   const [error, setError] = useState('');
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -45,7 +51,14 @@ export default function SignUpPage() {
     }
 
     try {
-      await signUp(formData.email, formData.password, formData.company, formData.fullName);
+      // 🔥 Pass structured data clearly
+      await signUp({
+        email: formData.email,
+        password: formData.password,
+        fullName: formData.fullName,
+        company: formData.company,
+      });
+
       router.push('/auth/signin?message=Check your email to confirm');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Sign up failed');
@@ -55,26 +68,27 @@ export default function SignUpPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8FAFC] px-4 py-12">
       <div className="w-full max-w-md">
-        {/* Logo Section */}
+
+        {/* Logo */}
         <div className="text-center mb-8">
           <div className="flex justify-center mb-4">
             <span className="text-5xl">🤝</span>
           </div>
           <h1 className="text-3xl font-bold text-[#0F172A] mb-2">ReferFriends</h1>
-          <p className="text-[#64748B]">Post jobs for free and build your referral network</p>
+          <p className="text-[#64748B]">
+            Post jobs for free and build your referral network
+          </p>
         </div>
 
-        {/* Card */}
         <Card padding="lg">
-          {/* Error Alert */}
           {error && (
             <div className="mb-6 p-4 bg-[#FEE2E2] border-2 border-[#FECACA] text-[#991B1B] rounded-xl text-sm font-medium">
               ✕ {error}
             </div>
           )}
 
-          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-5">
+
             <Input
               label="Full Name"
               type="text"
@@ -141,10 +155,8 @@ export default function SignUpPage() {
             </Button>
           </form>
 
-          {/* Divider */}
           <div className="my-6 border-t-2 border-[#E2E8F0]" />
 
-          {/* Sign In Link */}
           <p className="text-center text-[#64748B]">
             Already have an account?{' '}
             <Link
@@ -156,7 +168,6 @@ export default function SignUpPage() {
           </p>
         </Card>
 
-        {/* Footer */}
         <p className="text-center text-xs text-[#94A3B8] mt-6">
           By signing up, you agree to our Terms of Service and Privacy Policy
         </p>
